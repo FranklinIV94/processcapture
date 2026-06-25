@@ -186,6 +186,28 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
 MIT — Free to use, modify, and commercialize. See [LICENSE](LICENSE) for details.
 
-## Acknowledgments
+## Built By
 
-Built by [ALL LINES BUSINESS SOLUTIONS](https://simplifyingbusinesses.com) — We deploy AI agents for businesses. ProcessCapture is the first tool we use in every engagement, because you can't automate what you don't understand.
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <a href="https://prospyr305.com">
+        <strong>Prospyr 305</strong>
+        <br><sub>Agentic Design & Engineering Firm</sub>
+      </a>
+      <br><sub>AI agent workforces, MCP infrastructure,
+      <br>and systems that make AI real for business.</sub>
+    </td>
+    <td align="center" width="50%">
+      <a href="https://simplifyingbusinesses.com">
+        <strong>ALL LINES BUSINESS SOLUTIONS</strong>
+        <br><sub>Business operations, accounting,
+        <br>payroll & PEO consulting</sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+ProcessCapture is the first tool we use in every engagement, because you can't automate what you don't understand. It's open-sourced because we believe the first mile of AI adoption — understanding how work actually happens — should be accessible to everyone.
+
+**Want us to deploy AI agents for your business?** [Get in touch →](https://prospyr305.com/contact)
