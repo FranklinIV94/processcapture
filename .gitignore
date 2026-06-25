@@ -1,9 +1,40 @@
+# Dependencies
 node_modules/
-dist/
-*.mp4
-*.wav
 __pycache__/
 *.pyc
+.venv/
+venv/
+
+# Build output
+dist/
+build/
+
+# Electron
+release/
+
+# Recordings (local user data)
+.recordings/
+*.mp4
+*.wav
+!docs/**/*.mp4
+!docs/**/*.wav
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
-~/.processcapture/
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

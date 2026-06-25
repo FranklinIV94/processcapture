@@ -4,6 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Beta](https://img.shields.io/badge/Status-Beta-orange.svg)]()
+[![CI](https://github.com/FranklinIV94/processcapture/actions/workflows/ci.yml/badge.svg)](https://github.com/FranklinIV94/processcapture/actions/workflows/ci.yml)
 
 ProcessCapture is an open-source, self-hosted screen recorder with an AI agent built in. It records you performing your work, then an AI agent reviews the recording and produces a detailed workflow analysis report — processes, goals, successes, failures, bottlenecks, and structured documentation ready for automation design.
 
@@ -49,20 +50,20 @@ Each recording produces a workflow report with:
 - **Automation Opportunities** — Table with ROI ratings (10x/5x/2x/sub-1x)
 - **Agent Design Recommendations** — What should be deterministic, what needs AI judgment, what stays human
 
-## Installation
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 20+
-- Python 3.10+
-- ffmpeg (system install)
-- Tesseract OCR (system install)
+- [Node.js](https://nodejs.org/) 20+
+- [Python](https://www.python.org/downloads/) 3.10+
+- [ffmpeg](https://ffmpeg.org/download.html) (system install)
+- [Tesseract OCR](https://github.com/tesseract-ocr/tessdoc/blob/main/Installation.md) (system install)
 - An LLM API key (OpenAI, Cerebras, SambaNova, or any OpenAI-compatible provider)
 
 ### Install
 
 ```bash
-git clone https://github.com/albs-business/processcapture.git
+git clone https://github.com/FranklinIV94/processcapture.git
 cd processcapture
 npm install
 pip install faster-whisper pytesseract pillow openai
@@ -85,6 +86,12 @@ export PROCESSCAPTURE_MODEL="gpt-oss-120b"
 npm run dev
 ```
 
+### Build
+
+```bash
+npm run build
+```
+
 ## Use Cases
 
 - **AI/Agent deployments** — Understand how work actually happens before building automation
@@ -104,14 +111,81 @@ npm run dev
 | AI analysis | Any OpenAI-compatible LLM |
 | Storage | Local filesystem |
 
-## License
+## Privacy
 
-MIT — Free to use, modify, and commercialize.
+ProcessCapture is privacy-first by design:
 
-## Built By
+- **Recordings stay local** — Video files are saved to `~/.processcapture/recordings/` and never uploaded
+- **Processing is local** — Frame extraction, OCR, and transcription run on your machine
+- **Only the AI analysis call goes out** — And you control which LLM provider to use (OpenAI, Cerebras, SambaNova, or self-hosted via Ollama)
+- **No telemetry** — We don't collect any data, analytics, or tracking
 
-[ALL LINES BUSINESS SOLUTIONS](https://simplifyingbusinesses.com) — We deploy AI agents for businesses. ProcessCapture is the first tool we use in every engagement, because you can't automate what you don't understand.
+## Project Structure
+
+```
+processcapture/
+├── electron/          # Electron desktop app (main process + preload)
+│   ├── main.js         # Main process: recording, IPC, file management
+│   └── preload.js      # Context bridge for renderer
+├── pipeline/           # Python extraction + analysis pipeline
+│   ├── extract.py      # Frame extraction, OCR, transcription, timeline
+│   └── analyze.py      # Multi-pass LLM workflow analysis
+├── schemas/            # JSON schemas for output formats
+│   ├── recording.json  # Recording metadata schema
+│   └── timeline.json   # Timeline data schema
+├── src/                # React frontend
+│   ├── App.tsx         # Main UI component
+│   └── main.tsx        # React entry point
+├── .github/workflows/  # CI pipeline
+└── docs/               # Documentation (coming soon)
+```
+
+## Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `OPENAI_API_KEY` | *(required)* | API key for any OpenAI-compatible LLM |
+| `OPENAI_API_BASE` | `https://api.openai.com/v1` | Base URL for LLM provider |
+| `PROCESSCAPTURE_MODEL` | `gpt-4o` | Model name to use for analysis |
+| `PROCESSCAPTURE_API_KEY` | *(optional)* | Alternative env var for API key |
+
+### Supported LLM Providers
+
+Any OpenAI-compatible provider works:
+
+- [OpenAI](https://openai.com/)
+- [Cerebras](https://cerebras.ai/)
+- [SambaNova](https://sambanova.ai/)
+- [Ollama](https://ollama.ai/) (self-hosted, fully local)
+- [Groq](https://groq.com/)
+- Any other OpenAI-compatible endpoint
 
 ## Contributing
 
-Contributions welcome. This is an early beta — expect rough edges.
+Contributions welcome! This is an early beta — expect rough edges.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## Roadmap
+
+- [ ] Cross-platform screen capture (macOS, Windows, Linux)
+- [ ] Electron builder config for distributable packages
+- [ ] Web-based report viewer with timeline scrubbing
+- [ ] Multi-recording project grouping
+- [ ] Export to BPMN/flowchart formats
+- [ ] Ollama integration for fully local AI analysis
+- [ ] Team mode: shared recordings and reports
+
+## License
+
+MIT — Free to use, modify, and commercialize. See [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+Built by [ALL LINES BUSINESS SOLUTIONS](https://simplifyingbusinesses.com) — We deploy AI agents for businesses. ProcessCapture is the first tool we use in every engagement, because you can't automate what you don't understand.

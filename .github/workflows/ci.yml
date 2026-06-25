@@ -19,6 +19,7 @@ jobs:
           python-version: '3.12'
       - run: npm ci
       - run: npm run lint
+      - run: npm run typecheck
       - run: npm run build
-      - run: pip install faster-whisper pytesseract pillow openai
+      - run: pip install -r requirements.txt
       - run: python3 -c "import json; [json.load(open(f'schemas/{f}')) for f in ['recording.json','timeline.json']]"

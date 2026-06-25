@@ -1,17 +1,72 @@
 const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require('electron');
 const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process');
 const fs = require('fs');
 
 let mainWindow;
 let recordingProcess = null;
 
-const RECORDINGS_DIR = path.join(require('os').homedir(), '.processcapture', 'recordings');
+const RECORDINGS_DIR = path.join(os.homedir(), '.processcapture', 'recordings');
 
 function ensureRecordingsDir() {
   if (!fs.existsSync(RECORDINGS_DIR)) {
     fs.mkdirSync(RECORDINGS_DIR, { recursive: true });
   }
+}
+
+/**
+ * Get platform-specific ffmpeg input arguments for screen capture.
+ * Supports Linux (x11grab), macOS (avfoundation), and Windows (gdigrab).
+ */
+function getScreenCaptureArgs() {
+  const platform = process.platform;
+
+  if (platform === 'linux') {
+    return [
+      '-f', 'x11grab',
+      '-framerate', '30',
+      '-video_size', '1920x1080',
+      '-i', process.env.DISPLAY || ':0',
+    ];
+  }
+
+  if (platform === 'darwin') {
+    // AVFoundation screen capture — device index 1 = first screen
+    return [
+      '-f', 'avfoundation',
+      '-framerate', '30',
+      '-pixel_format', 'uyvy422',
+      '-i', '1:none',
+    ];
+  }
+
+  // Windows
+  return [
+    '-f', 'gdigrab',
+    '-framerate', '30',
+    '-i', 'desktop',
+  ];
+}
+
+/**
+ * Get platform-specific audio input arguments.
+ * Linux: pulse, macOS: avfoundation, Windows: dshow
+ */
+function getAudioInputArgs() {
+  const platform = process.platform;
+
+  if (platform === 'linux') {
+    return ['-f', 'pulse', '-i', 'default'];
+  }
+
+  if (platform === 'darwin') {
+    // AVFoundation audio — device index 0 = default input
+    return ['-f', 'avfoundation', '-i', 'none:0'];
+  }
+
+  // Windows — dshow with default audio device
+  return ['-f', 'dshow', '-i', 'audio=Microphone'];
 }
 
 function createWindow() {
@@ -29,7 +84,6 @@ function createWindow() {
     backgroundColor: '#0a0a0a',
   });
 
-  // In dev, load Vite dev server. In production, load built files.
   const isDev = !app.isPackaged;
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
@@ -72,21 +126,19 @@ ipcMain.handle('recording:start', async (event, { sourceId, projectName, checkli
     videoFile: `recording_${timestamp}.mp4`,
     audioFile: `recording_${timestamp}.wav`,
     status: 'recording',
+    platform: process.platform,
   };
   fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 
-  // Start ffmpeg recording
-  // Note: In production, ffmpeg path would be bundled. For dev, use system ffmpeg.
-  const ffmpegPath = 'ffmpeg'; // TODO: bundle with electron-builder
+  // Build ffmpeg args from platform-specific capture methods
+  const videoArgs = getScreenCaptureArgs();
+  const audioArgs = getAudioInputArgs();
+  const ffmpegPath = 'ffmpeg';
 
   recordingProcess = spawn(ffmpegPath, [
     '-y',
-    '-f', 'x11grab', // Linux. TODO: platform detection for darwin/win
-    '-framerate', '30',
-    '-video_size', '1920x1080',
-    '-i', process.env.DISPLAY || ':0',
-    '-f', 'pulse',
-    '-i', 'default',
+    ...videoArgs,
+    ...audioArgs,
     '-c:v', 'libx264',
     '-preset', 'fast',
     '-crf', '23',
@@ -96,13 +148,11 @@ ipcMain.handle('recording:start', async (event, { sourceId, projectName, checkli
   ]);
 
   recordingProcess.stderr.on('data', (data) => {
-    // Log ffmpeg output for debugging
     console.log(`ffmpeg: ${data}`);
   });
 
   recordingProcess.on('close', (code) => {
     console.log(`ffmpeg exited with code ${code}`);
-    // Update metadata
     metadata.status = 'completed';
     metadata.duration = Date.now() - new Date(metadata.timestamp).getTime();
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
@@ -114,7 +164,6 @@ ipcMain.handle('recording:start', async (event, { sourceId, projectName, checkli
 // IPC: Stop recording
 ipcMain.handle('recording:stop', async () => {
   if (recordingProcess) {
-    // Send 'q' to ffmpeg for clean shutdown
     recordingProcess.stdin.write('q');
     recordingProcess = null;
     return { success: true };
@@ -131,7 +180,6 @@ ipcMain.handle('recording:process', async (event, { videoPath, projectDir }) => 
     let output = '';
     processPy.stdout.on('data', (data) => {
       output += data.toString();
-      // Forward progress to UI
       mainWindow.webContents.send('processing:progress', data.toString());
     });
     processPy.stderr.on('data', (data) => {
