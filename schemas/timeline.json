@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProcessCapture Timeline",
+  "type": "object",
+  "required": ["total_frames", "frames", "transcript"],
+  "properties": {
+    "total_frames": {"type": "integer"},
+    "total_segments": {"type": "integer"},
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {"type": "integer"},
+          "timestamp": {"type": "number"},
+          "timestamp_str": {"type": "string"},
+          "file": {"type": "string"},
+          "ocr_text": {"type": "string"},
+          "transcript": {"type": "string"},
+          "changes": {
+            "oneOf": [
+              {"type": "string"},
+              {"type": "object",
+               "properties": {
+                 "added": {"type": "array", "items": {"type": "string"}},
+                 "removed": {"type": "array", "items": {"type": "string"}}
+               }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "transcript": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "start": {"type": "number"},
+          "end": {"type": "number"},
+          "text": {"type": "string"}
+        }
+      }
+    }
+  }
+}

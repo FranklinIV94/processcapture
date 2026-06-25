@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProcessCapture Recording Metadata",
+  "type": "object",
+  "required": ["project", "timestamp", "status"],
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Name of the workflow being recorded"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp of recording start"
+    },
+    "checklist": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "User's stated goals for this recording"
+    },
+    "videoFile": {
+      "type": "string",
+      "description": "Filename of the video recording"
+    },
+    "audioFile": {
+      "type": "string",
+      "description": "Filename of the extracted audio"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["recording", "completed", "processing", "analyzed"],
+      "description": "Current state of the recording"
+    },
+    "duration": {
+      "type": "number",
+      "description": "Duration in milliseconds"
+    }
+  }
+}
